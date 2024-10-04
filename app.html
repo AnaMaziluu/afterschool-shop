@@ -1,0 +1,87 @@
+<html>
+  <head>
+    <title>Afterschool Activities</title>
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+    <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1 v-text="sitename"></h1>
+        <!-- You can write the line above as: -->
+        <!-- <h1> {{sitename}} </h1>-->
+        <button v-on:click="showCheckout">
+          {{ cartItemCount }} 
+          <span class="fas fa-cart-plus"></span> 
+          Checkout
+        </button>
+      </header>
+
+      <main>
+        <div v-if="showLessons">
+          <figure>
+            <img
+              v-bind:src="lesson.imagFilePath"
+              v-bind:alt="lesson.imageFileText"
+              class="lessonImage"
+            />
+            <h2 v-text="lesson.subject"></h2>
+            <p v-text="lesson.location"></p>
+            <p>Price: {{ lesson.price }}</p>
+            <p> Available spaces: {{ lesson.availableSpaces }}</p>
+  
+            <button v-on:click="addToCart" v-if="canAddToCart">Add to cart</button>
+            <button disabled="disabled" v-else=>Add to cart</button>
+  
+          </figure>
+        </div>
+
+        <div v-else>
+          <p>This is the checkout page</p>
+         </div>
+
+
+      </main>
+    </div>
+
+    <script type="text/javascript">
+      // this is the option object
+      let webstore = new Vue({
+        // el is a mounting point selector
+        el: "#app",
+        data: {
+          showLessons: true,
+          sitename: "Afterschool activities",
+          lesson: {
+            id: 1,
+            subject: "Math class",
+            location: "Lorem ipsum",
+            price: 2000,
+            imagFilePath: "images/math.png",
+            imageFileText: "math",
+            availableSpaces: 5
+          },
+          cart: []
+        },
+        computed: {
+          cartItemCount: function() {
+            return this.cart.length || ""
+
+          },
+          canAddToCart: function() {
+            return this.lesson.availableSpaces > this.cartItemCount
+          }
+        },
+        methods: {
+          addToCart: function() {
+            this.cart.push(this.lesson.id)
+          },
+          showCheckout() {
+            this.showLessons = this.showLessons ? false : true
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
