@@ -43,6 +43,15 @@ let lessons = [
       image: "images/dance.jpg",
       availableSpaces: 7,
       rating: 3
+    },
+    {
+      id: 6,
+      title: "Math Lessons",
+      description: "Private math lessons for beginners.",
+      price: 30.00,
+      image: "images/math.jpg",
+      availableSpaces: 5,
+      rating: 5
     }
   ];
   
