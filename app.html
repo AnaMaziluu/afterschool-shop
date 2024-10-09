@@ -31,14 +31,93 @@
             <p>Price: {{ lesson.price }}</p>
             <p> Available spaces: {{ lesson.availableSpaces }}</p>
   
-            <button v-on:click="addToCart" v-if="canAddToCart">Add to cart</button>
-            <button disabled="disabled" v-else=>Add to cart</button>
-  
+            <button v-if="canAddToCart" v-on:click="addToCart">Add to cart</button>
+            <button v-else disabled>Add to cart</button>
+            
+            <span v-if="lessonSpacesLeft === 0">All out!</span>
+            <span v-else-if="lessonSpacesLeft < 5">Only {{ lessonSpacesLeft }} left!</span>
+            <span v-else>Buy now!</span>
+
+            <div>
+              <span v-for="n in lesson.rating">★</span>
+              <span v-for="n in 5 - lesson.rating">☆</span>
+            </div>
+
+
           </figure>
         </div>
 
+
+        <!-- Checkout page -->
+
         <div v-else>
-          <p>This is the checkout page</p>
+          <h1>Welcome to the checkout page</h1>
+          <p>
+            <strong>Name: </strong>
+            <input type="text" v-model.trim="order.name">
+          </p>
+
+          <p>
+            <strong>Surname: </strong>
+            <input type="text" v-model.trim="order.surname">
+          </p>
+
+          <p>
+            <strong>State: </strong>
+            <select v-model="order.state">
+              <option disabled>SelectState</option>
+              <option v-for="(state, key) in states" v-bind:value="state"> {{ key }}</option>
+            </select>
+          </p>
+
+          <p>
+            <strong>Zip/Postal Code: </strong>
+            <input type="number" v-model.number="order.zip">
+          </p>
+
+
+          <p>
+            <input type="checkbox" id="gift" v-model="order.gift" v-bind:true-value="order.sendGift" v-bind:false-value="order.dontSendGift" >
+            <label for="gift">Send as a gift?</label>
+          </p>
+          <p>
+            <input type="radio" id="home" value="Home" v-model="order.method">
+            <label for="home">Home</label>
+            <input type="radio" id="business" value="Business" v-model="order.method">
+            <label for="business">Business</label>
+          </p>
+
+
+
+
+
+
+
+
+          <h2>Order Information</h2>
+          <p>
+            <strong>Name:</strong> {{ order.name }}
+          </p>
+          <p>
+            <strong>Surname:</strong> {{ order.surname }}
+          </p>
+          <p>
+            <strong>State:</strong> {{ order.state }}
+          </p>
+          <p>
+            <strong>Zip/Postal Code:</strong> {{ order.zip }}
+          </p>
+          <p>
+            <strong>Gift? </strong> {{ order.gift }}
+          </p>
+          <p>
+            <strong>Deliver to address: </strong> {{ order.method }}
+          </p>
+
+          <button v-on:click="submitCheckoutForm">Place Order</button>
+
+
+
          </div>
 
 
@@ -60,9 +139,29 @@
             price: 2000,
             imagFilePath: "images/math.png",
             imageFileText: "math",
-            availableSpaces: 5
+            availableSpaces: 10,
+            rating: 3
           },
-          cart: []
+          order: {
+            name: "",
+            surname: "",
+            address: "",
+            city: "",
+            state: "",
+            zip: "",
+            state: "",
+            gift: "Do not send as a gift",
+            method: "Home",
+            sendGift: "Send as a gift",
+            dontSendGift: "Do not send as a gift"
+          },
+          cart: [],
+          states: {
+            AL: "Alabama",
+            AR: "Arizona",
+            CA: "California",
+            NV: "Nevada"
+          }
         },
         computed: {
           cartItemCount: function() {
@@ -71,6 +170,9 @@
           },
           canAddToCart: function() {
             return this.lesson.availableSpaces > this.cartItemCount
+          },
+          lessonSpacesLeft() {
+            return this.lesson.availableSpaces - this.cartItemCount
           }
         },
         methods: {
@@ -79,6 +181,9 @@
           },
           showCheckout() {
             this.showLessons = this.showLessons ? false : true
+          },
+          submitCheckoutForm() {
+            alert("Order submitted!")
           }
         }
       });
