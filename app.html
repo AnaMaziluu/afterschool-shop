@@ -24,7 +24,8 @@
 
       <div v-if="showLessons">
         <main>
-          <div v-for="lesson in lessons">
+           <!-- <div v-for="lesson in lessons"></div> -->
+          <div v-for="lesson in sortedLessonsPriceAscending">
             <figure>
               <img
                 v-bind:src="lesson.image"
@@ -126,16 +127,6 @@
           showLessons: true,
           sitename: "Afterschool activities",
           lessons: lessons,
-          // lesson: {
-          //   id: 1,
-          //   subject: "Math class",
-          //   location: "Lorem ipsum",
-          //   price: 2000,
-          //   imagFilePath: "images/math.png",
-          //   imageFileText: "math",
-          //   availableSpaces: 10,
-          //   rating: 3,
-          // },
           order: {
             name: "",
             surname: "",
@@ -160,8 +151,27 @@
         computed: {
           cartItemCount: function () {
             return this.cart.length || "";
-          }
-        },
+          },
+          sortedLessonsPriceAscending() {
+            
+            function compare(a,b) {
+              if (a.price > b.price) return 1
+              if (a.price < b.price) return -1
+              return 0
+            }
+
+            return this.lessons.sort(compare)
+          },
+          sortedLessonsPriceDescending() {
+            
+            function compare(a,b) {
+              if (a.price > b.price) return -1
+              if (a.price < b.price) return 1
+              return 0
+            }
+
+            return this.lessons.sort(compare)
+          }        },
         methods: {
           addToCart: function (lesson) {
             this.cart.push(lesson.id);
