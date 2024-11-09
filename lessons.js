@@ -6,7 +6,7 @@ let lessons = [
       price: 50.00,
       image: "images/football.png",
       imageFileText: "football",
-      availableSpaces: 10,
+      availableSpaces: 5,
       rating: 4
     },
     {
@@ -26,7 +26,7 @@ let lessons = [
       price: 40.00,
       image: "images/art.png",
       imageFileText: "art",
-      availableSpaces: 8,
+      availableSpaces: 5,
       rating: 4
     },
     {
@@ -36,7 +36,7 @@ let lessons = [
       price: 45.00,
       image: "images/coding.png",
       imageFileText: "coding",
-      availableSpaces: 12,
+      availableSpaces: 5,
       rating: 5
     },
     {
@@ -46,7 +46,7 @@ let lessons = [
       price: 35.00,
       image: "images/dance.png",
       imageFileText: "dance",
-      availableSpaces: 7,
+      availableSpaces: 5,
       rating: 3
     },
     {
