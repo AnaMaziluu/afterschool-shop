@@ -13,11 +13,18 @@
     <div id="app">
       <header>
         <h1 v-text="sitename"></h1>
-        <button v-on:click="showCheckout">
+        <button v-if="canSwitchPages()" v-on:click="showCheckout">
           {{ cartItemCount }}
           <span class="fas fa-cart-plus"></span>
           Checkout
         </button>
+        
+        <button v-else disabled>
+          {{ cartItemCount }}
+          <span class="fas fa-cart-plus"></span>
+          Checkout
+        </button>
+
       </header>
 
       <div v-if="showLessons">
@@ -225,6 +232,9 @@
           },
           canAddToCart: function (lesson) {
             return lesson.availableSpaces > this.cartLessonCount(lesson.id);
+          },
+          canSwitchPages: function () {
+            return this.cart.length > 0;
           },
           cartLessonCount: function (lessonId) {
             let count = 0;
