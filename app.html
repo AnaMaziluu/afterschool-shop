@@ -13,17 +13,11 @@
     <div id="app">
       <header>
         <h1 v-text="sitename"></h1>
-        <button v-if="canSwitchPages() " v-on:click="showCheckout">
-          {{ cartItemCount }}
-          <span class="fas fa-cart-plus"></span>
-          Checkout
-        </button>
-
-        <button v-else-if="!canSwitchPages() && !showLessons" v-on:click="showCheckout">
-          {{ cartItemCount }}
-          <span class="fas fa-cart-plus"></span>
-          Checkout
-        </button>
+        <button v-if="canSwitchPages() || !showLessons" v-on:click="showCheckout">
+        {{ cartItemCount }}
+        <span class="fas fa-cart-plus"></span>
+        {{ showLessons ? 'Checkout' : 'Back to Lessons' }}
+      </button>
 
         <button v-else disabled>
           {{ cartItemCount }}
@@ -308,7 +302,7 @@
             let nameRegex = /^[A-Za-z]+$/;
             let phoneRegex = /^[0-9]+$/;
 
-            return nameRegex.test(this.order.name) && phoneRegex.test(this.order.phone);
+            return nameRegex.test(this.order.name) && nameRegex.test(this.order.surname) && phoneRegex.test(this.order.phone) && this.cart.length > 0;
           },
         },
       });
