@@ -13,18 +13,23 @@
     <div id="app">
       <header>
         <h1 v-text="sitename"></h1>
-        <button v-if="canSwitchPages()" v-on:click="showCheckout">
-          {{ cartItemCount }}
-          <span class="fas fa-cart-plus"></span>
-          Checkout
-        </button>
-        
-        <button v-else disabled>
+        <button v-if="canSwitchPages() " v-on:click="showCheckout">
           {{ cartItemCount }}
           <span class="fas fa-cart-plus"></span>
           Checkout
         </button>
 
+        <button v-else-if="!canSwitchPages() && !showLessons" v-on:click="showCheckout">
+          {{ cartItemCount }}
+          <span class="fas fa-cart-plus"></span>
+          Checkout
+        </button>
+
+        <button v-else disabled>
+          {{ cartItemCount }}
+          <span class="fas fa-cart-plus"></span>
+          Checkout
+        </button>
       </header>
 
       <div v-if="showLessons">
@@ -68,8 +73,8 @@
           <div v-for="lesson in sortedLessons">
             <figure>
               <img
-                v-bind:src="lesson.image"
-                v-bind:alt="lesson.imageFileText"
+                :src="lesson.image"
+                :alt="lesson.imageFileText"
                 class="lessonImage"
               />
             </figure>
@@ -100,6 +105,18 @@
 
       <div v-else>
         <h1>Welcome to the checkout page</h1>
+        <div v-for="lesson in cartLessons" :key="lesson.id" class="cart-item">
+          <figure>
+            <img :src="lesson.image" :alt="lesson.imageFileText" class="lessonImage" />
+          </figure>
+          <h2>{{ lesson.subject }}</h2>
+          <p>Location: {{ lesson.location }}</p>
+          <p>Price: {{ lesson.price }}</p>
+          <p>Quantity: {{ lesson.quantity }}</p>
+          <button v-on:click="removeFromCart(lesson.id)">Remove from cart</button>
+        </div>
+
+        <!-- Checkout form -->
         <p>
           <strong>Name: </strong>
           <input type="text" v-model.trim="order.name" />
@@ -111,10 +128,15 @@
         </p>
 
         <p>
+          <strong>Phone: </strong>
+          <input type="text" v-model.trim="order.phone" />
+        </p>
+
+        <p>
           <strong>State: </strong>
           <select v-model="order.state">
             <option disabled>SelectState</option>
-            <option v-for="(state, key) in states" v-bind:value="state">
+            <option v-for="(state, key) in states" :value="state">
               {{ key }}
             </option>
           </select>
@@ -130,8 +152,8 @@
             type="checkbox"
             id="gift"
             v-model="order.gift"
-            v-bind:true-value="order.sendGift"
-            v-bind:false-value="order.dontSendGift"
+            :true-value="order.sendGift"
+            :false-value="order.dontSendGift"
           />
           <label for="gift">Send as a gift?</label>
         </p>
@@ -149,12 +171,20 @@
         <h2>Order Information</h2>
         <p><strong>Name:</strong> {{ order.name }}</p>
         <p><strong>Surname:</strong> {{ order.surname }}</p>
+        <p><strong>Phone:</strong> {{ order.phone }}</p>
         <p><strong>State:</strong> {{ order.state }}</p>
         <p><strong>Zip/Postal Code:</strong> {{ order.zip }}</p>
         <p><strong>Gift? </strong> {{ order.gift }}</p>
         <p><strong>Deliver to address: </strong> {{ order.method }}</p>
 
-        <button v-on:click="submitCheckoutForm">Place Order</button>
+        <button v-if="canPlaceOrder()" v-on:click="submitCheckoutForm">
+          Place Order
+        </button>
+
+        <button v-else disabled>
+          Place Order
+        </button>
+
       </div>
     </div>
 
@@ -164,12 +194,13 @@
         data: {
           showLessons: true,
           ascendingOrder: true,
-          sortOption: 'price',
+          sortOption: "price",
           sitename: "Afterschool activities",
           lessons: lessons,
           order: {
             name: "",
             surname: "",
+            phone: "",
             address: "",
             city: "",
             zip: "",
@@ -209,7 +240,23 @@
             }
 
             return sortedArray;
-          }
+          },
+          cartLessons() {
+            let groupedLessons = this.cart.reduce((acc, lessonId) => {
+              lesson = this.lessons.find((l) => l.id === lessonId);
+
+              if (lesson) {
+                if (!acc[lessonId]) {
+                  acc[lessonId] = { ...lesson, quantity: 1 };
+                } else {
+                  acc[lessonId].quantity += 1;
+                }
+              }
+              return acc;
+            }, {});
+
+            return Object.values(groupedLessons);
+          },
         },
         methods: {
           addToCart: function (lesson) {
@@ -235,6 +282,9 @@
           },
           canSwitchPages: function () {
             return this.cart.length > 0;
+          },          
+          canPlaceOrder: function () {
+            return this.cart.length > 0;
           },
           cartLessonCount: function (lessonId) {
             let count = 0;
@@ -247,6 +297,18 @@
           },
           lessonSpacesLeft(lesson) {
             return lesson.availableSpaces - this.cartLessonCount(lesson.id);
+          },
+          removeFromCart(lessonId) {
+            let index = this.cart.indexOf(lessonId)
+            if (index !== -1) {
+              this.cart.splice(index, 1)
+            }
+          },
+          canPlaceOrder() {
+            let nameRegex = /^[A-Za-z]+$/;
+            let phoneRegex = /^[0-9]+$/;
+
+            return nameRegex.test(this.order.name) && phoneRegex.test(this.order.phone);
           },
         },
       });
