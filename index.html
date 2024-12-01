@@ -13,11 +13,14 @@
     <div id="app">
       <header>
         <h1 v-text="sitename"></h1>
-        <button v-if="canSwitchPages() || !showLessons" v-on:click="showCheckout">
-        {{ cartItemCount }}
-        <span class="fas fa-cart-plus"></span>
-        {{ showLessons ? 'Checkout' : 'Back to Lessons' }}
-      </button>
+        <button
+          v-if="canSwitchPages() || !showLessons"
+          v-on:click="showCheckout"
+        >
+          {{ cartItemCount }}
+          <span class="fas fa-cart-plus"></span>
+          {{ showLessons ? 'Checkout' : 'Back to Lessons' }}
+        </button>
 
         <button v-else disabled>
           {{ cartItemCount }}
@@ -101,13 +104,19 @@
         <h1>Welcome to the checkout page</h1>
         <div v-for="lesson in cartLessons" :key="lesson.id" class="cart-item">
           <figure>
-            <img :src="lesson.image" :alt="lesson.imageFileText" class="lessonImage" />
+            <img
+              :src="lesson.image"
+              :alt="lesson.imageFileText"
+              class="lessonImage"
+            />
           </figure>
           <h2>{{ lesson.subject }}</h2>
           <p>Location: {{ lesson.location }}</p>
           <p>Price: {{ lesson.price }}</p>
           <p>Quantity: {{ lesson.quantity }}</p>
-          <button v-on:click="removeFromCart(lesson.id)">Remove from cart</button>
+          <button v-on:click="removeFromCart(lesson.id)">
+            Remove from cart
+          </button>
         </div>
 
         <!-- Checkout form -->
@@ -175,10 +184,7 @@
           Place Order
         </button>
 
-        <button v-else disabled>
-          Place Order
-        </button>
-
+        <button v-else disabled>Place Order</button>
       </div>
     </div>
 
@@ -190,7 +196,7 @@
           ascendingOrder: true,
           sortOption: "price",
           sitename: "Afterschool activities",
-          lessons: lessons,
+          lessons: [],
           order: {
             name: "",
             surname: "",
@@ -211,6 +217,13 @@
             CA: "California",
             NV: "Nevada",
           },
+        },
+        created: function () {
+          fetch("http://localhost:3000/collections/lessons").then(function (response) {
+            response.json().then(function (json) {
+              webstore.lessons = json;
+            });
+          });
         },
         computed: {
           cartItemCount: function () {
@@ -276,7 +289,7 @@
           },
           canSwitchPages: function () {
             return this.cart.length > 0;
-          },          
+          },
           canPlaceOrder: function () {
             return this.cart.length > 0;
           },
@@ -293,16 +306,21 @@
             return lesson.availableSpaces - this.cartLessonCount(lesson.id);
           },
           removeFromCart(lessonId) {
-            let index = this.cart.indexOf(lessonId)
+            let index = this.cart.indexOf(lessonId);
             if (index !== -1) {
-              this.cart.splice(index, 1)
+              this.cart.splice(index, 1);
             }
           },
           canPlaceOrder() {
             let nameRegex = /^[A-Za-z]+$/;
             let phoneRegex = /^[0-9]+$/;
 
-            return nameRegex.test(this.order.name) && nameRegex.test(this.order.surname) && phoneRegex.test(this.order.phone) && this.cart.length > 0;
+            return (
+              nameRegex.test(this.order.name) &&
+              nameRegex.test(this.order.surname) &&
+              phoneRegex.test(this.order.phone) &&
+              this.cart.length > 0
+            );
           },
         },
       });
