@@ -13,98 +13,104 @@
     <div id="app">
       <header>
         <h1 v-text="sitename"></h1>
+        <div>
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Start typing..."
+            @input="performSearch"
+          />
 
-        <input
-          type="text"
-          v-model="searchQuery"
-          placeholder="Start typing..."
-          @input="performSearch"
-        />
+          <button
+            v-if="canSwitchPages() || !showLessons"
+            v-on:click="showCheckout"
+          >
+            {{ cartItemCount }}
+            <span class="fas fa-cart-plus"></span>
+            {{ showLessons ? 'Checkout' : 'Back to Lessons' }}
+          </button>
 
-        <button
-          v-if="canSwitchPages() || !showLessons"
-          v-on:click="showCheckout"
-        >
-          {{ cartItemCount }}
-          <span class="fas fa-cart-plus"></span>
-          {{ showLessons ? 'Checkout' : 'Back to Lessons' }}
-        </button>
-
-        <button v-else disabled>
-          {{ cartItemCount }}
-          <span class="fas fa-cart-plus"></span>
-          Checkout
-        </button>
+          <button v-else disabled>
+            {{ cartItemCount }}
+            <span class="fas fa-cart-plus"></span>
+            Checkout
+          </button>
+        </div>
       </header>
 
       <div v-if="showLessons">
-        <main>
-          <!-- Sorting and ordering section -->
-          <div>
-            <p>Sort items by:</p>
-            <button v-on:click="selectSortingOption('subject')">
-              <span class="fas fa-book"></span>
-              Subject
-            </button>
-
-            <button v-on:click="selectSortingOption('location')">
-              <span class="fas fa-map-pin"></span>
-              Location
-            </button>
-
-            <button v-on:click="selectSortingOption('price')">
-              <span class="fas fa-coins"></span>
-              Price
-            </button>
-
-            <button v-on:click="selectSortingOption('space')">
-              <span class="fas fa-check"></span>
-              Available space
-            </button>
-
-            <p>Order:</p>
-
-            <button v-on:click="setAscendingOrder">
-              <span class="fas fa-arrow-up"></span>
-              Ascending
-            </button>
-
-            <button v-on:click="setDescendingOrder">
-              <span class="fas fa-arrow-down"></span>
-              Descending
-            </button>
-          </div>
-
-          <div v-for="lesson in searchResults">
-            <figure>
-              <img
-                :src="lesson.image"
-                :alt="lesson.imageFileText"
-                class="lessonImage"
-              />
-            </figure>
-            <h2 v-text="lesson.subject"></h2>
-            <p v-text="lesson.description"></p>
-            <p v-text="lesson.location"></p>
-            <p>Spaces: {{ lesson.availableSpaces }}</p>
-            <p>Price: {{ lesson.price }}</p>
-            <button v-if="canAddToCart(lesson)" v-on:click="addToCart(lesson)">
-              Add to cart
-            </button>
-            <button v-else disabled>Add to cart</button>
-
-            <span v-if="lessonSpacesLeft(lesson) === 0">All out!</span>
-            <span v-else-if="lessonSpacesLeft(lesson) < 5">
-              Only {{ lessonSpacesLeft(lesson) }} left!</span
-            >
-            <span v-else>Buy now!</span>
-
+        <section>
+          <main>
+            <!-- Sorting and ordering section -->
             <div>
-              <span v-for="n in lesson.rating">★</span>
-              <span v-for="n in 5 - lesson.rating">☆</span>
+              <p>Sort items by:</p>
+              <button v-on:click="selectSortingOption('subject')">
+                <span class="fas fa-book"></span>
+                Subject
+              </button>
+
+              <button v-on:click="selectSortingOption('location')">
+                <span class="fas fa-map-pin"></span>
+                Location
+              </button>
+
+              <button v-on:click="selectSortingOption('price')">
+                <span class="fas fa-coins"></span>
+                Price
+              </button>
+
+              <button v-on:click="selectSortingOption('space')">
+                <span class="fas fa-check"></span>
+                Available space
+              </button>
+
+              <p>Order:</p>
+
+              <button v-on:click="setAscendingOrder">
+                <span class="fas fa-arrow-up"></span>
+                Ascending
+              </button>
+
+              <button v-on:click="setDescendingOrder">
+                <span class="fas fa-arrow-down"></span>
+                Descending
+              </button>
             </div>
-          </div>
-        </main>
+
+            <div v-for="lesson in sortedLessons">
+              <figure>
+                <img
+                  :src="lesson.image"
+                  :alt="lesson.imageFileText"
+                  class="lessonImage"
+                />
+              </figure>
+              <h2 v-text="lesson.subject"></h2>
+              <p v-text="lesson.description"></p>
+              <p v-text="lesson.location"></p>
+              <p>Spaces: {{ lesson.availableSpaces }}</p>
+              <p>Price: {{ lesson.price }}</p>
+              <button
+                v-if="canAddToCart(lesson)"
+                v-on:click="addToCart(lesson)"
+              >
+                Add to cart
+              </button>
+              <button v-else disabled>Add to cart</button>
+
+              <span v-if="lessonSpacesLeft(lesson) === 0">All out!</span>
+              <span v-else-if="lessonSpacesLeft(lesson) < 5">
+                Only {{ lessonSpacesLeft(lesson) }} left!</span
+              >
+              <span v-else>Buy now!</span>
+
+              <div>
+                <span v-for="n in lesson.rating">★</span>
+                <span v-for="n in 5 - lesson.rating">☆</span>
+              </div>
+            </div>
+          </main>
+        </section>
       </div>
 
       <!-- Checkout page -->
@@ -184,7 +190,7 @@
             return this.cart.length || "";
           },
           sortedLessons() {
-            let sortedArray = [...this.this.searchResults];
+            let sortedArray = [...this.searchResults];
 
             if (this.sortOption === "price") {
               sortedArray.sort((a, b) => a.price - b.price);
@@ -256,6 +262,7 @@
               })),
             };
 
+            // submit the order
             fetch("http://localhost:3000/collections/orders", {
               method: "POST",
               headers: {
@@ -272,47 +279,63 @@
               .then((data) => {
                 alert(`Order submitted! Order ID: ${data.orderId}`);
 
-                // Update the available spaces for each lesson in the backend
-                this.cartLessons.forEach((lesson) => {
+                // update spaces for each lesson
+                const updatePromises = this.cartLessons.map((lesson) =>
                   this.updateLessonSpaces(
                     lesson.id,
                     lesson.availableSpaces - lesson.quantity
-                  );
-                });
+                  )
+                );
 
+                // wait for all updates to finish before fetching lessons
+                return Promise.all(updatePromises);
+              })
+              .then(() => {
+                console.log(
+                  "All lesson updates complete. Fetching updated lessons..."
+                );
+                 // refresh lessons after updates
+                return this.fetchLessons();
+              })
+              .then(() => {
+                console.log("Lessons refreshed successfully!");
+
+                // reset form and cart
                 this.cart = [];
                 this.order = {
                   name: "",
                   surname: "",
                   phone: "",
                 };
-                this.fetchLessons();
                 this.showLessons = true;
               })
               .catch((error) => {
-                console.error(error);
-                alert("Error submitting order");
+                console.error("Error during order submission process:", error);
+                alert("An error occurred while submitting your order.");
               });
           },
           updateLessonSpaces(lessonId, newSpaces) {
-            fetch(`http://localhost:3000/collections/lessons/${lessonId}`, {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ availableSpaces: newSpaces }),
-            })
+            return fetch(
+              `http://localhost:3000/collections/lessons/${lessonId}`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ availableSpaces: newSpaces }),
+              }
+            )
               .then((response) => {
                 if (!response.ok) {
-                  throw new Error("Failed to update lesson spaces");
+                  throw new Error(`Failed to update lesson ${lessonId}`);
                 }
                 console.log(
                   `Lesson ${lessonId} spaces updated to ${newSpaces}`
                 );
               })
               .catch((error) => {
-                console.error(error);
-                alert("Error updating lesson spaces");
+                console.error(`Error updating lesson ${lessonId}:`, error);
+                throw error;
               });
           },
           canAddToCart: function (lesson) {
@@ -359,7 +382,11 @@
               return;
             }
 
-            fetch(`http://localhost:3000/search?q=${encodeURIComponent(this.searchQuery)}`)
+            fetch(
+              `http://localhost:3000/search?q=${encodeURIComponent(
+                this.searchQuery
+              )}`
+            )
               .then((response) => {
                 if (!response.ok) {
                   throw new Error("Failed to fetch search results");
