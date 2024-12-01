@@ -13,6 +13,14 @@
     <div id="app">
       <header>
         <h1 v-text="sitename"></h1>
+
+        <input
+          type="text"
+          v-model="searchQuery"
+          placeholder="Start typing..."
+          @input="performSearch"
+        />
+
         <button
           v-if="canSwitchPages() || !showLessons"
           v-on:click="showCheckout"
@@ -67,7 +75,7 @@
             </button>
           </div>
 
-          <div v-for="lesson in sortedLessons">
+          <div v-for="lesson in searchResults">
             <figure>
               <img
                 :src="lesson.image"
@@ -153,11 +161,13 @@
       let webstore = new Vue({
         el: "#app",
         data: {
+          searchQuery: "",
+          searchResults: [],
+          lessons: [],
           showLessons: true,
           ascendingOrder: true,
           sortOption: "price",
           sitename: "Afterschool activities",
-          lessons: [],
           order: {
             name: "",
             surname: "",
@@ -167,13 +177,14 @@
         },
         created: function () {
           this.fetchLessons();
+          this.searchResults = this.lessons;
         },
         computed: {
           cartItemCount: function () {
             return this.cart.length || "";
           },
           sortedLessons() {
-            let sortedArray = [...this.lessons];
+            let sortedArray = [...this.this.searchResults];
 
             if (this.sortOption === "price") {
               sortedArray.sort((a, b) => a.price - b.price);
@@ -225,9 +236,12 @@
             this.showLessons = this.showLessons ? false : true;
           },
           fetchLessons() {
-            fetch("http://localhost:3000/collections/lessons").then(function (response) {
+            fetch("http://localhost:3000/collections/lessons").then(function (
+              response
+            ) {
               response.json().then(function (json) {
                 webstore.lessons = json;
+                webstore.searchResults = json;
               });
             });
           },
@@ -280,7 +294,6 @@
                 alert("Error submitting order");
               });
           },
-          
           updateLessonSpaces(lessonId, newSpaces) {
             fetch(`http://localhost:3000/collections/lessons/${lessonId}`, {
               method: "PUT",
@@ -339,6 +352,27 @@
               phoneRegex.test(this.order.phone) &&
               this.cart.length > 0
             );
+          },
+          performSearch() {
+            if (this.searchQuery.trim() === "") {
+              this.searchResults = this.lessons;
+              return;
+            }
+
+            fetch(`http://localhost:3000/search?q=${encodeURIComponent(this.searchQuery)}`)
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error("Failed to fetch search results");
+                }
+                return response.json();
+              })
+              .then((data) => {
+                this.searchResults = data;
+              })
+              .catch((error) => {
+                console.error("Error fetching search results:", error);
+                alert("Error performing search");
+              });
           },
         },
       });
