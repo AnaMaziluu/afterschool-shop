@@ -78,6 +78,7 @@
             <h2 v-text="lesson.subject"></h2>
             <p v-text="lesson.description"></p>
             <p v-text="lesson.location"></p>
+            <p>Spaces: {{ lesson.availableSpaces }}</p>
             <p>Price: {{ lesson.price }}</p>
             <button v-if="canAddToCart(lesson)" v-on:click="addToCart(lesson)">
               Add to cart
@@ -161,29 +162,11 @@
             name: "",
             surname: "",
             phone: "",
-            address: "",
-            city: "",
-            zip: "",
-            state: "",
-            gift: "Do not send as a gift",
-            method: "Home",
-            sendGift: "Send as a gift",
-            dontSendGift: "Do not send as a gift",
           },
           cart: [],
-          states: {
-            AL: "Alabama",
-            AR: "Arizona",
-            CA: "California",
-            NV: "Nevada",
-          },
         },
         created: function () {
-          fetch("http://localhost:3000/collections/lessons").then(function (response) {
-            response.json().then(function (json) {
-              webstore.lessons = json;
-            });
-          });
+          this.fetchLessons();
         },
         computed: {
           cartItemCount: function () {
@@ -241,8 +224,83 @@
           showCheckout() {
             this.showLessons = this.showLessons ? false : true;
           },
+          fetchLessons() {
+            fetch("http://localhost:3000/collections/lessons").then(function (response) {
+              response.json().then(function (json) {
+                webstore.lessons = json;
+              });
+            });
+          },
           submitCheckoutForm() {
-            alert("Order submitted!");
+            const order = {
+              name: this.order.name,
+              surname: this.order.surname,
+              phoneNumber: this.order.phone,
+              lessonIDs: this.cartLessons.map((lesson) => ({
+                id: lesson.id,
+                spaces: lesson.quantity,
+              })),
+            };
+
+            fetch("http://localhost:3000/collections/orders", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(order),
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error("Failed to create order");
+                }
+                return response.json();
+              })
+              .then((data) => {
+                alert(`Order submitted! Order ID: ${data.orderId}`);
+
+                // Update the available spaces for each lesson in the backend
+                this.cartLessons.forEach((lesson) => {
+                  this.updateLessonSpaces(
+                    lesson.id,
+                    lesson.availableSpaces - lesson.quantity
+                  );
+                });
+
+                this.cart = [];
+                this.order = {
+                  name: "",
+                  surname: "",
+                  phone: "",
+                };
+                this.fetchLessons();
+                this.showLessons = true;
+              })
+              .catch((error) => {
+                console.error(error);
+                alert("Error submitting order");
+              });
+          },
+          
+          updateLessonSpaces(lessonId, newSpaces) {
+            fetch(`http://localhost:3000/collections/lessons/${lessonId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ availableSpaces: newSpaces }),
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error("Failed to update lesson spaces");
+                }
+                console.log(
+                  `Lesson ${lessonId} spaces updated to ${newSpaces}`
+                );
+              })
+              .catch((error) => {
+                console.error(error);
+                alert("Error updating lesson spaces");
+              });
           },
           canAddToCart: function (lesson) {
             return lesson.availableSpaces > this.cartLessonCount(lesson.id);
