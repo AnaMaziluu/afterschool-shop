@@ -42,7 +42,7 @@
         <section>
           <main>
             <!-- Sorting and ordering section -->
-            <div>
+            <div class="sorting-controls">
               <p>Sort items by:</p>
               <button v-on:click="selectSortingOption('subject')">
                 <span class="fas fa-book"></span>
@@ -78,37 +78,37 @@
             </div>
 
             <div v-for="lesson in sortedLessons">
-              <figure>
-                <img
-                  :src="lesson.image"
-                  :alt="lesson.imageFileText"
-                  class="lessonImage"
-                />
-              </figure>
-              <h2 v-text="lesson.subject"></h2>
-              <p v-text="lesson.description"></p>
-              <p v-text="lesson.location"></p>
-              <p>Spaces: {{ lesson.availableSpaces }}</p>
-              <p>Price: {{ lesson.price }}</p>
-              <button
-                v-if="canAddToCart(lesson)"
-                v-on:click="addToCart(lesson)"
-              >
-                Add to cart
-              </button>
-              <button v-else disabled>Add to cart</button>
 
-              <span v-if="lessonSpacesLeft(lesson) === 0">All out!</span>
-              <span v-else-if="lessonSpacesLeft(lesson) < 5">
-                Only {{ lessonSpacesLeft(lesson) }} left!</span
-              >
-              <span v-else>Buy now!</span>
-
-              <div>
-                <span v-for="n in lesson.rating">★</span>
-                <span v-for="n in 5 - lesson.rating">☆</span>
+              <div class="lesson-card">
+                <figure>
+                  <img :src="lesson.image" :alt="lesson.imageFileText" class="lessonImage" />
+                </figure>
+                <div class="lesson-card-content">
+                  <h2 v-text="lesson.subject"></h2>
+                  <p v-text="lesson.description"></p>
+                  <p v-text="lesson.location"></p>
+                  <p>Spaces: {{ lesson.availableSpaces }}</p>
+                  <p>Price: {{ lesson.price }}</p>
+                  <button v-if="canAddToCart(lesson)" v-on:click="addToCart(lesson)">
+                    Add to cart
+                  </button>
+                  <button v-else disabled>Add to cart</button>
+              
+                  <span v-if="lessonSpacesLeft(lesson) === 0">All out!</span>
+                  <span v-else-if="lessonSpacesLeft(lesson) < 5">
+                    Only {{ lessonSpacesLeft(lesson) }} left!
+                  </span>
+                  <span v-else>Buy now!</span>
+              
+                  <div>
+                    <span v-for="n in lesson.rating">★</span>
+                    <span v-for="n in 5 - lesson.rating">☆</span>
+                  </div>
+                </div>
               </div>
-            </div>
+              
+
+
           </main>
         </section>
       </div>
