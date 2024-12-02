@@ -242,7 +242,7 @@
             this.showLessons = this.showLessons ? false : true;
           },
           fetchLessons() {
-              fetch("http://afterschoolnew-env.eba-mjwfffwm.eu-west-2.elasticbeanstalk.com/collections/lessons").then(function (
+              fetch("https://afterschoolnew-env.eba-mjwfffwm.eu-west-2.elasticbeanstalk.com/collections/lessons").then(function (
               response
             ) {
               response.json().then(function (json) {
@@ -263,7 +263,7 @@
             };
 
             // submit the order
-            fetch("http://afterschoolnew-env.eba-mjwfffwm.eu-west-2.elasticbeanstalk.com/collections/orders", {
+            fetch("https://afterschoolnew-env.eba-mjwfffwm.eu-west-2.elasticbeanstalk.com/collections/orders", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -316,7 +316,7 @@
           },
           updateLessonSpaces(lessonId, newSpaces) {
             return fetch(
-              `http://afterschoolnew-env.eba-mjwfffwm.eu-west-2.elasticbeanstalk.com/collections/lessons/${lessonId}`,
+              `https://afterschoolnew-env.eba-mjwfffwm.eu-west-2.elasticbeanstalk.com/collections/lessons/${lessonId}`,
               {
                 method: "PUT",
                 headers: {
@@ -383,7 +383,7 @@
             }
 
             fetch(
-              `http://afterschoolnew-env.eba-mjwfffwm.eu-west-2.elasticbeanstalk.com/search?q=${encodeURIComponent(
+              `https://afterschoolnew-env.eba-mjwfffwm.eu-west-2.elasticbeanstalk.com/search?q=${encodeURIComponent(
                 this.searchQuery
               )}`
             )
