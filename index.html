@@ -87,7 +87,8 @@
                   <h2 v-text="lesson.subject"></h2>
                   <p v-text="lesson.description"></p>
                   <p v-text="lesson.location"></p>
-                  <p>Spaces: {{ lesson.availableSpaces }}</p>
+                  <!-- <p>Spaces: {{ lesson.availableSpaces }}</p> -->
+                  <p>Spaces: {{ lessonSpacesLeft(lesson) }}</p>
                   <p>Price: {{ lesson.price }}</p>
                   <button v-if="canAddToCart(lesson)" v-on:click="addToCart(lesson)">
                     Add to cart
